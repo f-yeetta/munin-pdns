@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+#  pdns_auth_qsize munin plugin.
+#  Written by Florus Both <florus@yeetta.net> 2013-05-17
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_auth_*]' >/etc/munin/plugin-conf.d/pdns_auth
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_auth
+#
+#  Configuration variables:
+#
+#    pdns_control:    Path to rec_control executable
+#                     (default: /usr/local/bin/pdns_control)
+
+PDNS_CONTROL="${pdns_control:-/usr/local/bin/pdns_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$PDNS_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PowerDNS DB Queue'
+	echo 'graph_order qsize'
+	echo 'graph_vlabel # waiting queries'
+	echo 'graph_info Database performance'
+	echo 'graph_category PowerDNS'
+
+	echo 'qsize.label qsize'
+	echo 'qsize.type GAUGE'
+	echo 'qsize.info Number of questions waiting for the database'
+
+	exit 0
+fi
+
+echo qsize.value `"$PDNS_CONTROL" show qsize_q`
+
+exit 0

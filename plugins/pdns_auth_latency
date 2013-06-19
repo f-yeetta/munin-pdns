@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+#  pdns_auth_latency munin plugin.
+#  Written by Florus Both <florus@yeetta.net> 2013-05-17
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_auth_*]' >/etc/munin/plugin-conf.d/pdns_auth
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_auth
+#
+#  Configuration variables:
+#
+#    pdns_control:    Path to rec_control executable
+#                     (default: /usr/local/bin/pdns_control)
+
+PDNS_CONTROL="${pdns_control:-/usr/local/bin/pdns_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$PDNS_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PowerDNS Latency'
+	echo 'graph_order lat'
+	echo 'graph_vlabel usec'
+	echo 'graph_info Average number of usec to answer a query'
+	echo 'graph_category PowerDNS'
+
+	echo 'lat.label latency'
+	echo 'lat.type GAUGE'
+	echo 'lat.info Average number of usec to answer a query'
+
+	exit 0
+fi
+
+echo lat.value `"$PDNS_CONTROL" show latency`
+
+exit 0

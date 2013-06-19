@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+#  pdns_auth_udp_queries munin plugin.
+#  Written by Florus Both <florus@yeetta.net> 2013-05-17
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_auth_*]' >/etc/munin/plugin-conf.d/pdns_auth
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_auth
+#
+#  Configuration variables:
+#
+#    pdns_control:    Path to rec_control executable
+#                     (default: /usr/local/bin/pdns_control)
+
+PDNS_CONTROL="${pdns_control:-/usr/local/bin/pdns_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$PDNS_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PowerDNS UDP Queries DERIVE'
+	echo 'graph_order udp4a udp6a udp4q udp6q'
+	echo 'graph_vlabel queries'
+	#echo 'graph_args --base 1000'
+	echo 'graph_info # queries'
+	echo 'graph_category PowerDNS'
+
+	echo 'udp4a.label udp4 answers'
+	echo 'udp4a.min 0'
+	echo 'udp4a.type DERIVE'
+	echo 'udp4a.info UDP4 Answers'
+
+	echo 'udp4q.label udp4 queries'
+	echo 'udp4q.min 0'
+	echo 'udp4q.type DERIVE'
+	echo 'udp4q.info UDP4 Queries'
+
+	echo 'udp6a.label udp6 answers'
+	echo 'udp6a.min 0'
+	echo 'udp6a.type DERIVE'
+	echo 'udp6a.info UDP6 Answers'
+
+	echo 'udp6q.label udp6 queries'
+	echo 'udp6q.min 0'
+	echo 'udp6q.type DERIVE'
+	echo 'udp6q.info UDP6 Queries'
+
+	exit 0
+fi
+
+echo udp4a.value `"$PDNS_CONTROL" show udp4-answers`
+echo udp4q.value `"$PDNS_CONTROL" show udp4-queries`
+echo udp6a.value `"$PDNS_CONTROL" show udp6-answers`
+echo udp6q.value `"$PDNS_CONTROL" show udp6-queries`
+
+exit 0

@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+#  pdns_auth_querycache munin plugin.
+#  Written by Florus Both <florus@yeetta.net> 2013-05-17
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_auth_*]' > /usr/local/etc/munin/plugin-conf.d/pdns_auth
+#    echo 'user root' >> /usr/local/etc/munin/plugin-conf.d/pdns_auth
+#
+#  Configuration variables:
+#
+#    pdns_control:    Path to rec_control executable
+#                     (default: /usr/local/bin/pdns_control)
+
+PDNS_CONTROL="${pdns_control:-/usr/local/bin/pdns_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$PDNS_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PowerDNS Auth Query Cache'
+	echo 'graph_order pchit pcmiss'
+	echo 'graph_vlabel queries'
+	echo 'graph_info Query cache'
+	echo 'graph_category PowerDNS'
+
+	echo 'qchit.label Query Cache Hits'
+	echo 'qchit.min 0'
+	echo 'qchit.max 1000000'
+	echo 'qchit.type DERIVE'
+	echo 'qchit.info Query Cache Hits'
+
+	echo 'qcmiss.label Query Cache Misses'
+	echo 'qcmiss.min 0'
+	echo 'qcmiss.max 1000000'
+	echo 'qcmiss.type DERIVE'
+	echo 'qcmiss.info Query Cache Misses'
+
+	exit 0
+fi
+
+echo qchit.value `"$PDNS_CONTROL" show query-cache-hit`
+echo qcmiss.value `"$PDNS_CONTROL" show query-cache-miss`
+
+exit 0
